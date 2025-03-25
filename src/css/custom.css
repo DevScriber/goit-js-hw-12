@@ -135,3 +135,25 @@
     transform: rotate(360deg);
   }
 }
+
+/* pagination button styles */
+
+.pagination-btn {
+  display: none;
+  margin: 32px auto 44px auto;
+  border-radius: 8px;
+  padding: 8px 16px;
+  background-color: #4e75ff;
+  color: #fff;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+  letter-spacing: 0.04em;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.pagination-btn:hover {
+  background: #6c8cff;
+}
