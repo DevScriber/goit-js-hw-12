@@ -2,14 +2,13 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 import iconError from './img/cross.png';
-
 import { getImages } from './js/pixabay-api';
 import { renderGallery, cleanGallery } from './js/render-functions';
 
 let userAnswer = '';
 let page = 1;
 const per_page = 15;
-const maxImagesLimit = 45;
+let totalHits = 0;
 
 const iziToastNoMatches = {
   message:
@@ -35,7 +34,7 @@ const form = document.querySelector('.form');
 const loader = document.querySelector('.loader');
 const paginationButton = document.querySelector('.pagination-btn');
 
-form.addEventListener(`submit`, formSubmit);
+form.addEventListener('submit', formSubmit);
 paginationButton.addEventListener('click', handlePagination);
 
 async function formSubmit(event) {
@@ -52,10 +51,16 @@ async function formSubmit(event) {
 
   page = 1;
   cleanGallery();
+  hidePaginationButton();
   showLoader();
 
   try {
-    const { hits } = await getImages(userAnswer, page, per_page);
+    const { hits, totalHits: total } = await getImages(
+      userAnswer,
+      page,
+      per_page
+    );
+    totalHits = total;
 
     if (!hits.length) {
       iziToast.show(iziToastNoMatches);
@@ -63,9 +68,7 @@ async function formSubmit(event) {
     }
 
     renderGallery(hits);
-    showPaginationButton();
-
-    checkLimit();
+    checkPaginationAvailability();
   } catch {
     iziToast.error({
       message: 'An error occurred while fetching images.',
@@ -79,6 +82,7 @@ async function formSubmit(event) {
 
 async function handlePagination() {
   page++;
+  hidePaginationButton();
   showLoader();
 
   try {
@@ -92,7 +96,7 @@ async function handlePagination() {
       behavior: 'smooth',
     });
 
-    checkLimit();
+    checkPaginationAvailability();
   } catch {
     iziToast.error({
       message: 'An error occurred while fetching images.',
@@ -103,10 +107,17 @@ async function handlePagination() {
   }
 }
 
-function checkLimit() {
-  if (page * per_page >= maxImagesLimit) {
+function checkPaginationAvailability() {
+  const loadedImages = page * per_page;
+
+  // Ограничиваем количество загружаемых изображений
+  const maxImagesLimit = 45;
+
+  if (loadedImages >= totalHits || loadedImages >= maxImagesLimit) {
     iziToast.info(iziToastEndResults);
     hidePaginationButton();
+  } else {
+    showPaginationButton();
   }
 }
 
